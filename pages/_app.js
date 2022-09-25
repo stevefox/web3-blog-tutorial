@@ -1,4 +1,5 @@
 /* pages/__app.js */
+import '../styles/globals.css'
 import { useState } from 'react'
 import Link from 'next/link'
 import { css } from '@emotion/css'
@@ -8,34 +9,36 @@ import WalletConnectProvider from '@walletconnect/web3-provider'
 import { AccountContext } from '../context.js'
 import { ownerAddress } from '../config'
 import 'easymde/dist/easymde.min.css'
-import '../styles/globals.css'
 
-function App({ Component, pageProps }) {
-  const [account, setAccount] = useState(null);
-
+function MyApp({ Component, pageProps }) {
+  /* create local state to save account information after signin */
+  const [account, setAccount] = useState(null)
+  /* web3Modal configuration for enabling wallet access */
   async function getWeb3Modal() {
     const web3Modal = new Web3Modal({
       cacheProvider: false,
       providerOptions: {
-        walletConnect: {
+        walletconnect: {
           package: WalletConnectProvider,
-          options: {
-            infuraId: "91024de0bd974d17a6a097f80f03a0be"
-          }
-        }
-      }
+          options: { 
+            infuraId: "your-infura-id"
+          },
+        },
+      },
     })
+    return web3Modal
   }
 
+  /* the connect function uses web3 modal to connect to the user's wallet */
   async function connect() {
     try {
-      const web3Modal = await getWeb3Modal();
-      const connection = await web3Modal.connect();
-      const provider = await new ethers.providers.Web3Provider(connection);
-      const accounts = await provider.listAccounts();
-      setAccount(accounts[0]);
+      const web3Modal = await getWeb3Modal()
+      const connection = await web3Modal.connect()
+      const provider = new ethers.providers.Web3Provider(connection)
+      const accounts = await provider.listAccounts()
+      setAccount(accounts[0])
     } catch (err) {
-      console.log('error:', err);
+      console.log('error:', err)
     }
   }
 
@@ -46,7 +49,7 @@ function App({ Component, pageProps }) {
           <Link href="/">
             <a>
               <img
-                src="/logo.svg"
+                src='/logo.svg'
                 alt="React Logo"
                 style={{ width: '50px' }}
               />
@@ -68,22 +71,22 @@ function App({ Component, pageProps }) {
             )
           }
           {
-            account && (
-              <p className={accountInfo}>{account}</p>
-            )
+            account && <p className={accountInfo}>{account}</p>
           }
         </div>
         <div className={linkContainer}>
-          <Link href="/">
+          <Link href="/" >
             <a className={link}>
               Home
             </a>
           </Link>
           {
+            /* if the signed in user is the contract owner, we */
+            /* show the nav link to create a new post */
             (account === ownerAddress) && (
               <Link href="/create-post">
                 <a className={link}>
-                  CreatePost
+                  Create Post
                 </a>
               </Link>
             )
@@ -106,7 +109,6 @@ const accountInfo = css`
   justify-content: flex-end;
   font-size: 12px;
 `
-
 
 const container = css`
   padding: 40px;
@@ -168,4 +170,4 @@ const link = css`
   font-weight: 400;
 `
 
-export default App;
+export default MyApp
