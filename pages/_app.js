@@ -10,3 +10,6 @@ import { ownerAddress } from '../config'
 import 'easymde/dist/easymde.min.css'
 import '../styles/globals.css'
 
+function App({ Component, pageProps }) {
+
+}
